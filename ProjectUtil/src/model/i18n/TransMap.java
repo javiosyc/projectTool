@@ -1,4 +1,4 @@
-package i18n;
+package model.i18n;
 
 import java.util.Iterator;
 import java.util.Map;

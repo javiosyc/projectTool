@@ -1,4 +1,4 @@
-package i18n;
+package model.i18n;
 
 public enum LanguageCode {
 	en, vn, zh_CN, zh_TW;

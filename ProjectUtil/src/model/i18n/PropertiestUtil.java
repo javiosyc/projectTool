@@ -1,12 +1,16 @@
-package i18n;
+package model.i18n;
+
+import gui.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -19,7 +23,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class PropertiestUtil {
 
-	public TreeSet<TransMap> getPropValues(String... paths) throws IOException {
+	public List<TransMap> getPropValues(String... paths) throws IOException {
 		TreeSet<TransMap> result = new TreeSet<TransMap>();
 		LanguageCode languageCode;
 
@@ -63,10 +67,15 @@ public class PropertiestUtil {
 				}
 			}
 		}
-		return result;
+		return new ArrayList<TransMap>(result);
 	}
 
-	public void exportData(String path, TreeSet<TransMap> data) {
+	public void exportData(File path, List<TransMap> data) {
+
+		if (!"xlsx".equals(Utils.getExtension(path.getName()))) {
+			path = new File(path.getName() + ".xlsx");
+		}
+
 		XSSFWorkbook workbook = new XSSFWorkbook();
 
 		// Create a blank sheet
@@ -78,7 +87,7 @@ public class PropertiestUtil {
 
 		FileOutputStream fos = null;
 		try {
-			fos = new FileOutputStream(new File(path));
+			fos = new FileOutputStream(path);
 			workbook.write(fos);
 
 		} catch (FileNotFoundException e) {
@@ -94,7 +103,7 @@ public class PropertiestUtil {
 		}
 	}
 
-	private void genData(XSSFSheet sheet, int rownum, TreeSet<TransMap> data) {
+	private void genData(XSSFSheet sheet, int rownum, List<TransMap> data) {
 		for (TransMap trans : data) {
 			Row row = sheet.createRow(rownum++);
 
@@ -140,5 +149,25 @@ public class PropertiestUtil {
 			Cell cell = head.createCell(index++);
 			cell.setCellValue(column);
 		}
+	}
+
+	public List<TransMap> getPropValues(File[] selectedFile) throws IOException {
+
+		String[] selectedName = new String[selectedFile.length];
+		String defaultFolder = System.getProperty("user.dir") + File.separator
+				+ "src" + File.separator;
+
+		for (int i = 0; i < selectedFile.length; i++) {
+			String path = selectedFile[i].toString();
+			int index = path.indexOf(defaultFolder);
+
+			if (index == -1) {
+				throw new IOException();
+			}
+
+			selectedName[i] = path.substring(index + defaultFolder.length(),
+					path.length());
+		}
+		return getPropValues(selectedName);
 	}
 }
