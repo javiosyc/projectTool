@@ -2,11 +2,17 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 
 import controller.Controller;
@@ -19,6 +25,11 @@ public class MainFrame extends JFrame {
 	private TranslationTablePanel tablePanel;
 	private Controller controller;
 
+	private PrefsDialog prefsDailog;
+	private Preferences prefs;
+
+	private static String DEFAULT_WRITE_FOLDER_KEY = "defaultWriteFolder";
+
 	public MainFrame() {
 
 		super("Project Tools");
@@ -30,6 +41,9 @@ public class MainFrame extends JFrame {
 		tablePanel = new TranslationTablePanel();
 		controller = new Controller();
 
+		prefsDailog = new PrefsDialog(this);
+		prefs = Preferences.userRoot().node("projectTool.dir");
+
 		tablePanel.setData(controller.getTransMaps());
 		tablePanel.setTranslationTableistener(new TranslationTableistener() {
 			public void rowDeleted(int row) {
@@ -37,8 +51,27 @@ public class MainFrame extends JFrame {
 			}
 		});
 
-		fileChooser = new PropertiesFileChooser();
-		excelFileChooser = new ExcelFileChooser();
+		fileChooser = new PropertiesFileChooser(Utils.DEFAULT_FOLDER);
+		excelFileChooser = new ExcelFileChooser(prefs.get(
+				DEFAULT_WRITE_FOLDER_KEY, Utils.DEFAULT_FOLDER));
+
+		setJMenuBar(createMenuBar());
+
+		prefsDailog.setPrefsListener(new PrefsListener() {
+			public void preferencesSet(String defaultPath) {
+				prefs.put(DEFAULT_WRITE_FOLDER_KEY, defaultPath);
+			}
+
+			public void preferenceReset() {
+				if (prefs != null) {
+					prefs.remove(DEFAULT_WRITE_FOLDER_KEY);
+					prefsDailog.setDefaulsts(Utils.DEFAULT_FOLDER);
+				}
+			}
+		});
+		String defaultPath = prefs.get(DEFAULT_WRITE_FOLDER_KEY,
+				Utils.DEFAULT_FOLDER);
+		prefsDailog.setDefaulsts(defaultPath);
 
 		toolbar.setToolBarListener(new ToolBarListener() {
 			public void textEmitted(String text) {
@@ -84,6 +117,25 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 
+	}
+
+	private JMenuBar createMenuBar() {
+		JMenuBar menuBar = new JMenuBar();
+
+		final JMenu fileMenu = new JMenu("File");
+
+		JMenuItem prefsItem = new JMenuItem("Preferencess");
+
+		fileMenu.add(prefsItem);
+
+		menuBar.add(fileMenu);
+		prefsItem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				prefsDailog.setVisible(true);
+			}
+		});
+
+		return menuBar;
 	}
 
 }

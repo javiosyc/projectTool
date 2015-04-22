@@ -25,7 +25,7 @@ public class PropertiesFileFilter extends FileFilter {
 
 	@Override
 	public String getDescription() {
-		return "Person database files (*.per)";
+		return "Properties files (*.properties)";
 	}
 
 }

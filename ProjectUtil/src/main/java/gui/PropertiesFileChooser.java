@@ -6,8 +6,8 @@ import javax.swing.JFileChooser;
 
 public class PropertiesFileChooser extends JFileChooser {
 
-	public PropertiesFileChooser() {
-		setCurrentDirectory(new File(Utils.DEFAULT_FOLDER));
+	public PropertiesFileChooser(String dir) {
+		setCurrentDirectory(new File(dir));
 		setAcceptAllFileFilterUsed(false);
 		setMultiSelectionEnabled(true);
 		addChoosableFileFilter(new PropertiesFileFilter());

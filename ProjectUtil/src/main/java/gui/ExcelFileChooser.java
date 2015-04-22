@@ -7,8 +7,8 @@ import javax.swing.filechooser.FileFilter;
 
 public class ExcelFileChooser extends JFileChooser {
 
-	public ExcelFileChooser() {
-		setCurrentDirectory(new File(Utils.DEFAULT_FOLDER));
+	public ExcelFileChooser(String dir) {
+		setCurrentDirectory(new File(dir));
 		addChoosableFileFilter(new FileFilter() {
 			@Override
 			public String getDescription() {
@@ -19,18 +19,9 @@ public class ExcelFileChooser extends JFileChooser {
 			public boolean accept(File f) {
 				if (f.isDirectory()) {
 					return true;
-				}
-				String name = f.getName();
-
-				String extension = Utils.getExtension(name);
-				if (extension == null) {
+				} else {
 					return false;
 				}
-
-				if ("xlsx".equals(extension)) {
-					return true;
-				}
-				return false;
 			}
 		});
 	}

@@ -3,10 +3,15 @@ package model.i18n;
 import gui.Utils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,23 +32,28 @@ public class PropertiestUtil {
 		TreeSet<TransMap> result = new TreeSet<TransMap>();
 		LanguageCode languageCode;
 
-		Map<String, Properties> props = new HashMap<String, Properties>();
-
-		for (String path : paths) {
-			languageCode = LanguageCode.parsePath(path);
+		for (String pathFile : paths) {
+			languageCode = LanguageCode.parsePath(pathFile);
 
 			Properties prop = new Properties();
-			String propFileName = path;
-			InputStream inputStream = getClass().getClassLoader()
-					.getResourceAsStream(propFileName);
-
-			if (inputStream != null) {
-				prop.load(inputStream);
+			
+			final Path path = Paths.get(pathFile);
+			
+			if(Files.exists(path, LinkOption.NOFOLLOW_LINKS)) {
+				prop.load(new FileInputStream(pathFile));
 			} else {
-				throw new FileNotFoundException("property file '"
-						+ propFileName + "' not found in the classpath");
-			}
+				InputStream inputStream = getClass().getClassLoader()
+						.getResourceAsStream(pathFile);
 
+				if (inputStream != null) {
+					prop.load(inputStream);
+				} else {
+					throw new FileNotFoundException("property file '"
+							+ pathFile + "' not found in the classpath");
+				}
+				
+			}
+			
 			Iterator<Entry<Object, Object>> it = prop.entrySet().iterator();
 
 			while (it.hasNext()) {
@@ -72,8 +82,13 @@ public class PropertiestUtil {
 
 	public void exportData(File path, List<TransMap> data) {
 
+		File exportFile ;
+		
 		if (!"xlsx".equals(Utils.getExtension(path.getName()))) {
-			path = new File(path.getName() + ".xlsx");
+			Path rename  = Paths.get(path.toString()+".xlsx");
+			exportFile = rename.toFile();
+		} else {
+			exportFile = path;
 		}
 
 		XSSFWorkbook workbook = new XSSFWorkbook();
@@ -87,7 +102,7 @@ public class PropertiestUtil {
 
 		FileOutputStream fos = null;
 		try {
-			fos = new FileOutputStream(path);
+			fos = new FileOutputStream(exportFile);
 			workbook.write(fos);
 
 		} catch (FileNotFoundException e) {
