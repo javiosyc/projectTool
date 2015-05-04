@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 public class Toolbar extends JPanel implements ActionListener {
+	private static final long serialVersionUID = 3710616126983846137L;
 	private JButton importButton;
 	private JButton exportButton;
 	private ToolBarListener toolBarListener;
@@ -17,10 +18,12 @@ public class Toolbar extends JPanel implements ActionListener {
 	public Toolbar() {
 
 		setBorder(BorderFactory.createEtchedBorder());
-		importButton = new JButton("Import");
+		importButton = new JButton();
+		importButton.setIcon(Utils.createIcon("/images/Import16.gif"));
 		importButton.addActionListener(this);
 		importButton.setMnemonic(KeyEvent.VK_I);
-		exportButton = new JButton("Export");
+		exportButton = new JButton();
+		exportButton.setIcon(Utils.createIcon("/images/Export16.gif"));
 		exportButton.addActionListener(this);
 		exportButton.setMnemonic(KeyEvent.VK_O);
 		setLayout(new FlowLayout(FlowLayout.LEFT));

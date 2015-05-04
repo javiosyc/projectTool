@@ -17,6 +17,7 @@ import model.i18n.TransMap;
 
 public class TranslationTablePanel extends JPanel {
 
+	private static final long serialVersionUID = -895376974642630155L;
 	private JTable table;
 	private JPopupMenu popup;
 

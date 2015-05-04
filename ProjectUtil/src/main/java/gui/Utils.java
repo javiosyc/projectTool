@@ -26,7 +26,7 @@ public class Utils {
 		URL url = System.class.getResource(path);
 
 		if (url == null) {
-			System.err.println("Unable to laod image:" + url);
+			System.err.println("Unable to load image:" + url);
 			return null;
 		}
 

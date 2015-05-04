@@ -14,10 +14,12 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JTabbedPane;
 
 import controller.Controller;
 
 public class MainFrame extends JFrame {
+	private static final long serialVersionUID = -6356926813883348241L;
 	private TextPanel textPanel;
 	private Toolbar toolbar;
 	private PropertiesFileChooser fileChooser;
@@ -27,6 +29,10 @@ public class MainFrame extends JFrame {
 
 	private PrefsDialog prefsDailog;
 	private Preferences prefs;
+
+	private JTabbedPane tabPane;
+
+	private MessagePanel messsagePanel;
 
 	private static String DEFAULT_WRITE_FOLDER_KEY = "defaultWriteFolder";
 
@@ -38,18 +44,13 @@ public class MainFrame extends JFrame {
 
 		toolbar = new Toolbar();
 		textPanel = new TextPanel();
-		tablePanel = new TranslationTablePanel();
+
 		controller = new Controller();
 
 		prefsDailog = new PrefsDialog(this);
 		prefs = Preferences.userRoot().node("projectTool.dir");
 
-		tablePanel.setData(controller.getTransMaps());
-		tablePanel.setTranslationTableistener(new TranslationTableistener() {
-			public void rowDeleted(int row) {
-				controller.removenTransMap(row);
-			}
-		});
+		initTabPanel();
 
 		fileChooser = new PropertiesFileChooser(Utils.DEFAULT_FOLDER);
 		excelFileChooser = new ExcelFileChooser(prefs.get(
@@ -110,12 +111,30 @@ public class MainFrame extends JFrame {
 		});
 
 		add(toolbar, BorderLayout.NORTH);
-		add(tablePanel, BorderLayout.CENTER);
+		add(tabPane, BorderLayout.CENTER);
 		add(textPanel, BorderLayout.SOUTH);
 		setMinimumSize(new Dimension(500, 400));
 		setSize(600, 500);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
+
+	}
+
+	private void initTabPanel() {
+		tabPane = new JTabbedPane();
+
+		tablePanel = new TranslationTablePanel();
+		tablePanel.setData(controller.getTransMaps());
+		tablePanel.setTranslationTableistener(new TranslationTableistener() {
+			public void rowDeleted(int row) {
+				controller.removenTransMap(row);
+			}
+		});
+
+		messsagePanel = new MessagePanel();
+
+		tabPane.addTab("Preperites Parser", tablePanel);
+		tabPane.addTab("Messages Server", messsagePanel);
 
 	}
 

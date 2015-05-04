@@ -14,6 +14,8 @@ import javax.swing.JTextField;
 
 public class PrefsDialog extends JDialog {
 
+	private static final long serialVersionUID = -4072445341490010759L;
+
 	private JButton okButton;
 
 	private JButton cancelButton;

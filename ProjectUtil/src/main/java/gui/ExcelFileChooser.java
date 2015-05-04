@@ -7,6 +7,8 @@ import javax.swing.filechooser.FileFilter;
 
 public class ExcelFileChooser extends JFileChooser {
 
+	private static final long serialVersionUID = -2630021070509809637L;
+
 	public ExcelFileChooser(String dir) {
 		setCurrentDirectory(new File(dir));
 		addChoosableFileFilter(new FileFilter() {

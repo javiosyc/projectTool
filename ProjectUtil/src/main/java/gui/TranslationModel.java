@@ -9,6 +9,8 @@ import model.i18n.TransMap;
 
 public class TranslationModel extends AbstractTableModel {
 
+	private static final long serialVersionUID = 3585002363882687736L;
+
 	List<TransMap> db;
 
 	String[] colNames = { "No.","KEY", "繁中", "簡中", "英文", "越南" };
