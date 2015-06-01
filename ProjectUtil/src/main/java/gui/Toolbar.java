@@ -19,11 +19,11 @@ public class Toolbar extends JPanel implements ActionListener {
 
 		setBorder(BorderFactory.createEtchedBorder());
 		importButton = new JButton();
-		importButton.setIcon(Utils.createIcon("/images/Import16.gif"));
+		importButton.setIcon(Utils.createIcon("/images/open-file-icon.png"));
 		importButton.addActionListener(this);
 		importButton.setMnemonic(KeyEvent.VK_I);
 		exportButton = new JButton();
-		exportButton.setIcon(Utils.createIcon("/images/Export16.gif"));
+		exportButton.setIcon(Utils.createIcon("/images/file-export-icon.png"));
 		exportButton.addActionListener(this);
 		exportButton.setMnemonic(KeyEvent.VK_O);
 		setLayout(new FlowLayout(FlowLayout.LEFT));

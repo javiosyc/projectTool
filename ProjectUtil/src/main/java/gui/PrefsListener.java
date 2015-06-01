@@ -3,7 +3,10 @@ package gui;
 
 public interface PrefsListener {
 
-	void preferencesSet(String defaultPath);
+	void setPreferences(String defaultImportPath,
+			String defaultExportPath);
 
-	void preferenceReset();
+	String getDefaultExporPath();
+
+	String getDefaultImporPath();
 }

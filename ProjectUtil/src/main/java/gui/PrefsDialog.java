@@ -22,13 +22,16 @@ public class PrefsDialog extends JDialog {
 
 	private JButton resetButton;
 
-	private JButton selectFileButton;
+	private JButton selectImportButton;
 
 	private JFileChooser fileChooser;
 
-	private JTextField defaultPathField;
+	private JTextField defaultImportPathField;
 
 	private PrefsListener prefsListener;
+
+	private JTextField defaultExportPathField;
+	private JButton selectExportButton;
 
 	public PrefsDialog(JFrame parent) {
 		super(parent, "Preferences", false);
@@ -36,9 +39,12 @@ public class PrefsDialog extends JDialog {
 		okButton = new JButton("Ok");
 		cancelButton = new JButton("Cancel");
 		resetButton = new JButton("Reset");
-		defaultPathField = new JTextField(20);
 
-		selectFileButton = new JButton("select path");
+		defaultImportPathField = new JTextField(30);
+		selectImportButton = new JButton("Import Path");
+
+		defaultExportPathField = new JTextField(30);
+		selectExportButton = new JButton("Export Path");
 
 		fileChooser = new JFileChooser();
 		fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -53,35 +59,69 @@ public class PrefsDialog extends JDialog {
 		// First row
 		gc.weightx = 1;
 		gc.weighty = 1;
+
 		gc.fill = GridBagConstraints.NONE;
-
 		gc.gridx = 0;
-		add(selectFileButton, gc);
+		add(selectImportButton, gc);
 
-		gc.gridy++;
+		gc.gridx++;
 		gc.gridwidth = 2;
-		add(defaultPathField, gc);
+		add(defaultImportPathField, gc);
+
 		// / Next row
 
 		gc.gridy++;
 		gc.gridwidth = 1;
 		gc.gridx = 0;
 
+		add(selectExportButton, gc);
+
+		gc.gridx++;
+		gc.gridwidth = 2;
+
+		add(defaultExportPathField, gc);
+
+		// Next row
+		gc.gridy++;
+		gc.gridwidth = 1;
+		gc.gridx = 0;
 		add(okButton, gc);
 
 		gc.gridx++;
+		gc.gridwidth = 1;
 		add(cancelButton, gc);
 
-		gc.gridy++;
-
-		gc.gridx = 0;
+		gc.gridx++;
 		add(resetButton, gc);
-		selectFileButton.addActionListener(new ActionListener() {
+
+		selectImportButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				if (prefsListener != null) {
+					String path = prefsListener.getDefaultImporPath();
+					fileChooser.setCurrentDirectory(new File(path));
+				}
+
 				if (fileChooser.showOpenDialog(PrefsDialog.this) == JFileChooser.APPROVE_OPTION) {
 					File path = fileChooser.getSelectedFile();
-					defaultPathField.setText(path.toString() + File.separator);
+					defaultImportPathField.setText(path.toString()
+							+ File.separator);
+				}
+			}
+		});
+
+		selectExportButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (prefsListener != null) {
+					String path = prefsListener.getDefaultExporPath();
+					fileChooser.setCurrentDirectory(new File(path));
+				}
+
+				if (fileChooser.showOpenDialog(PrefsDialog.this) == JFileChooser.APPROVE_OPTION) {
+					File path = fileChooser.getSelectedFile();
+					defaultExportPathField.setText(path.toString()
+							+ File.separator);
 				}
 			}
 		});
@@ -89,10 +129,11 @@ public class PrefsDialog extends JDialog {
 		okButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				String defaultPath = defaultPathField.getText();
-
+				String defaultImportPath = defaultImportPathField.getText();
+				String defalutExportPath = defaultExportPathField.getText();
 				if (prefsListener != null) {
-					prefsListener.preferencesSet(defaultPath);
+					prefsListener.setPreferences(defaultImportPath,
+							defalutExportPath);
 				}
 				setVisible(false);
 			}
@@ -107,22 +148,28 @@ public class PrefsDialog extends JDialog {
 		resetButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				if (prefsListener != null) {
-					prefsListener.preferenceReset();
+					
+					defaultImportPathField.setText(prefsListener.getDefaultImporPath());
+					defaultExportPathField.setText(prefsListener.getDefaultExporPath());
 				}
 			}
 		});
 
-		setSize(400, 300);
+		setSize(600, 300);
 
 		setLocationRelativeTo(parent);
 	}
 
-	public void setDefaulsts(String defalutPath) {
-		defaultPathField.setText(defalutPath);
+	public void setDefaultImportPath(String defaultImportPathField) {
+		this.defaultImportPathField.setText(defaultImportPathField);
 	}
 
 	public void setPrefsListener(PrefsListener prefsListener) {
 		this.prefsListener = prefsListener;
+	}
+
+	public void setDefaultExportPath(String defaultExportPath) {
+		this.defaultExportPathField.setText(defaultExportPath);
 	}
 
 }

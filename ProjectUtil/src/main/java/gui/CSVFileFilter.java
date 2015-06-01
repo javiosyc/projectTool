@@ -1,9 +1,10 @@
 package gui;
+
 import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
-public class PropertiesFileFilter extends FileFilter {
+public class CSVFileFilter extends FileFilter {
 
 	@Override
 	public boolean accept(File f) {
@@ -17,15 +18,16 @@ public class PropertiesFileFilter extends FileFilter {
 			return false;
 		}
 
-		if ("properties".equals(extension)) {
+		if ("csv".equals(extension) || "txt".equals(extension)) {
 			return true;
 		}
+
 		return false;
 	}
 
 	@Override
 	public String getDescription() {
-		return "Properties files (*.properties)";
+		return "CSV (*.csv)";
 	}
 
 }

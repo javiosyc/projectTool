@@ -1,11 +1,15 @@
 package gui;
 
+import gui.Attendance.AttendanceTablePanel;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.prefs.Preferences;
 
 import javax.swing.JFileChooser;
@@ -22,9 +26,9 @@ public class MainFrame extends JFrame {
 	private static final long serialVersionUID = -6356926813883348241L;
 	private TextPanel textPanel;
 	private Toolbar toolbar;
-	private PropertiesFileChooser fileChooser;
+	private CSVFileChooser fileChooser;
 	private ExcelFileChooser excelFileChooser;
-	private TranslationTablePanel tablePanel;
+	private AttendanceTablePanel attendaceTable;
 	private Controller controller;
 
 	private PrefsDialog prefsDailog;
@@ -32,9 +36,9 @@ public class MainFrame extends JFrame {
 
 	private JTabbedPane tabPane;
 
-	private MessagePanel messsagePanel;
+	private static String DEFAULT_EXPORT_FOLDER_KEY = "defaultExportFolder";
 
-	private static String DEFAULT_WRITE_FOLDER_KEY = "defaultWriteFolder";
+	private static String DEFAULT_IMPORT_FOLDER_KEY = "defaultImportFolder";
 
 	public MainFrame() {
 
@@ -47,32 +51,11 @@ public class MainFrame extends JFrame {
 
 		controller = new Controller();
 
-		prefsDailog = new PrefsDialog(this);
-		prefs = Preferences.userRoot().node("projectTool.dir");
-
 		initTabPanel();
 
-		fileChooser = new PropertiesFileChooser(Utils.DEFAULT_FOLDER);
-		excelFileChooser = new ExcelFileChooser(prefs.get(
-				DEFAULT_WRITE_FOLDER_KEY, Utils.DEFAULT_FOLDER));
+		initPrefDailog();
 
 		setJMenuBar(createMenuBar());
-
-		prefsDailog.setPrefsListener(new PrefsListener() {
-			public void preferencesSet(String defaultPath) {
-				prefs.put(DEFAULT_WRITE_FOLDER_KEY, defaultPath);
-			}
-
-			public void preferenceReset() {
-				if (prefs != null) {
-					prefs.remove(DEFAULT_WRITE_FOLDER_KEY);
-					prefsDailog.setDefaulsts(Utils.DEFAULT_FOLDER);
-				}
-			}
-		});
-		String defaultPath = prefs.get(DEFAULT_WRITE_FOLDER_KEY,
-				Utils.DEFAULT_FOLDER);
-		prefsDailog.setDefaulsts(defaultPath);
 
 		toolbar.setToolBarListener(new ToolBarListener() {
 			public void textEmitted(String text) {
@@ -81,18 +64,19 @@ public class MainFrame extends JFrame {
 
 			public void fireLoadFileChooser() {
 				if (fileChooser.showOpenDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
-					File[] selectedFile = fileChooser.getSelectedFiles();
+					File selectedFile = fileChooser.getSelectedFile();
 
 					textPanel.appendText("selected File:\n");
-					for (File file : selectedFile) {
-						textPanel.appendText(file + "\n");
-					}
+					textPanel.appendText(selectedFile + "\n");
+
 					try {
-						int count = controller.loadFromFile(selectedFile);
+						int count = controller
+								.loadFromFile(new File[] { selectedFile });
 
-						tablePanel.refresh();
+						attendaceTable.refresh();
 
-						textPanel.appendText("read properties size :" + count);
+						textPanel.appendText("read properties size :" + count
+								+ "\n");
 
 					} catch (IOException e) {
 						JOptionPane.showMessageDialog(MainFrame.this,
@@ -105,7 +89,15 @@ public class MainFrame extends JFrame {
 			public void fireSaveFileChooser() {
 				if (excelFileChooser.showSaveDialog(MainFrame.this) == JFileChooser.APPROVE_OPTION) {
 					File file = excelFileChooser.getSelectedFile();
-					controller.saveToFile(file);
+					try {
+						controller.saveToFile(file);
+					} catch (FileNotFoundException e) {
+						textPanel.appendText(e + "\n");
+					} catch (IOException e) {
+						textPanel.appendText(e + "\n");
+					} catch (ParseException e) {
+						textPanel.appendText(e + "\n");
+					}
 				}
 			}
 		});
@@ -114,28 +106,60 @@ public class MainFrame extends JFrame {
 		add(tabPane, BorderLayout.CENTER);
 		add(textPanel, BorderLayout.SOUTH);
 		setMinimumSize(new Dimension(500, 400));
-		setSize(600, 500);
+		setSize(700, 500);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 
 	}
 
-	private void initTabPanel() {
-		tabPane = new JTabbedPane();
+	private void initPrefDailog() {
+		prefs = Preferences.userRoot().node("projectTool.dir");
 
-		tablePanel = new TranslationTablePanel();
-		tablePanel.setData(controller.getTransMaps());
-		tablePanel.setTranslationTableistener(new TranslationTableistener() {
-			public void rowDeleted(int row) {
-				controller.removenTransMap(row);
+		prefsDailog = new PrefsDialog(this);
+		prefsDailog.setPrefsListener(new PrefsListener() {
+			public void setPreferences(String defaultImportPath,
+					String defaultExportPath) {
+				prefs.put(DEFAULT_EXPORT_FOLDER_KEY, defaultExportPath);
+				prefs.put(DEFAULT_IMPORT_FOLDER_KEY, defaultImportPath);
+				fileChooser.setCurrentDirectory(new File(defaultImportPath));
+				excelFileChooser
+						.setCurrentDirectory(new File(defaultExportPath));
+			}
+
+			@Override
+			public String getDefaultExporPath() {
+				return prefs.get(DEFAULT_EXPORT_FOLDER_KEY,
+						Utils.DEFAULT_FOLDER);
+			}
+
+			@Override
+			public String getDefaultImporPath() {
+				return prefs.get(DEFAULT_IMPORT_FOLDER_KEY,
+						Utils.DEFAULT_FOLDER);
 			}
 		});
 
-		messsagePanel = new MessagePanel();
+		String exportPath = prefs.get(DEFAULT_EXPORT_FOLDER_KEY,
+				Utils.DEFAULT_FOLDER);
 
-		tabPane.addTab("Preperites Parser", tablePanel);
-		tabPane.addTab("Messages Server", messsagePanel);
+		String importPath = prefs.get(DEFAULT_IMPORT_FOLDER_KEY,
+				Utils.DEFAULT_FOLDER);
 
+		prefsDailog.setDefaultImportPath(importPath);
+
+		prefsDailog.setDefaultExportPath(exportPath);
+
+		fileChooser = new CSVFileChooser(importPath);
+
+		excelFileChooser = new ExcelFileChooser(exportPath);
+
+	}
+
+	private void initTabPanel() {
+		tabPane = new JTabbedPane();
+		attendaceTable = new AttendanceTablePanel();
+		attendaceTable.setData(controller.getAttendance());
+		tabPane.addTab("Check In/Out Log", attendaceTable);
 	}
 
 	private JMenuBar createMenuBar() {
